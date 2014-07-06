@@ -55,7 +55,9 @@ class Player(gevent.Greenlet):
             
             self.consume()
 
-        self.terrain.died(self)
+        self.logger.debug('%d player dead', self.number)
+
+        self.terrain.dead(self)
 
     def decideNextAction(self):
         sugarOnHere = self.terrain.peek(self.position)
@@ -145,7 +147,7 @@ class Terrain(gevent.Greenlet):
             self.players.append(player)
             self.scatter(player)
     
-    def died(self, player):
+    def dead(self, player):
         if player in self.players:
             self.players.remove(player)
             self.positions.remove(player.position)
@@ -203,7 +205,7 @@ class Terrain(gevent.Greenlet):
 if __name__ == '__main__':
     terrain = Terrain(len(GrowthMap), GrowthMap)
     judge = MoveJudge(terrain)
-    players = [Player(i, terrain, judge) for i in xrange(10)]
+    players = [Player(i, terrain, judge) for i in xrange(4000)]
 
     allObjects = [terrain] + [judge] + players
 
