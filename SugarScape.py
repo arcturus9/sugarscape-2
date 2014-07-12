@@ -82,6 +82,7 @@ class Player(gevent.Greenlet):
         return candidate
 
     def move(self, position):
+        self.logger.debug('%d player moved, previous:%s, current:%s', self.number, self.position, position)
         self.terrain.movePlayer(self, position)
 
     def gather(self):
@@ -184,7 +185,6 @@ class Terrain(gevent.Greenlet):
     def gather(self, position):
         x, y = position
         self.sugarMap[y][x] /= 2
-        self.logger.debug('position:%s, sugar:%d, growth:%d', position, self.sugarMap[y][x], self.growthMap[y][x])
         return self.sugarMap[y][x]
     
     def grow(self):
@@ -198,7 +198,7 @@ class Terrain(gevent.Greenlet):
             gevent.sleep(0.2)
             self.grow()
             for player in self.players:
-                self.logger.debug('%d player, sugar:%d, position:%s', player.number, player.sugar, player.position)
+                self.logger.debug(player.__dict__)
                 player.tick.set()
 
 
