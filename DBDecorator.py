@@ -1,8 +1,7 @@
 from DBSession import DBSession
 from Config import Config
 
-DB_SESSION = DBSession(Config.dbHost, Config.dbBucket)
-
+DB_SESSION = DBSession(Config['dbHost'], Config['dbBucket'])
 
 def SaveObject(func):
     def SaveObjectToDB(self, *args, **kwargs):
@@ -13,9 +12,12 @@ def SaveObject(func):
     return SaveObjectToDB
 
 def LoadObject(func):
-    def LoadObjectToDB(self);
+    def LoadObjectToDB(self, *args, **kwargs):
         loadResult = DB_SESSION.Load(self)
-        result = func(self, loadResult)
+        if loadResult.success:
+            for name, value in loadResult.value.iteritems():
+                setattr(self, name, value)
+        result = func(self, *args, **kwargs)
         return result
 
     return LoadObjectToDB
