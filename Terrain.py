@@ -23,9 +23,10 @@ class Terrain(gevent.Greenlet):
         for player in players:
             pos = tuple(self.playerSave[player.Key()])
             self.positions[pos] = player
+            if player.Key() in self.reservePositionSave:
+                reservedPos = tuple(self.reservePositionSave[player.Key()])
+                self.reservedPositions[reservedPos] = player
         self.players.extend(players)
-        for player, pos in self.reservePositionSave.iteritems():
-            self.reservedPositions[pos] = player
         self.logger.debug('player loaded')
         
     def born(self, player):
@@ -83,14 +84,21 @@ class Terrain(gevent.Greenlet):
             for x, growth in enumerate(line):
                 self.sugar[y][x] += growth
 
+    @SaveObject
     def _run(self):
-        self.running = True
-        while self.running:
-            gevent.sleep(0.2)
-            self.grow()
-            for player in self.players:
-                self.logger.debug('%s: %d, %s' % (player.Key(), player.sugar, player.position))
-                player.tick.set()
+        try:
+            self.running = True
+            while self.running:
+                gevent.sleep(0.2)
+                self.grow()
+                for player in self.players:
+                    self.logger.debug('%s: %d, %s' % (player.Key(), player.sugar, player.position))
+                    player.tick.set()
+        except KeyboardInterrupt:
+            self.logger.debug('end signal')
+            raise SystemExit
+        except:
+            self.logger.error(sys.exc_info()[0])
 
     def Key(self):
         return 'terrain'

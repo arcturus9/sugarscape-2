@@ -4,23 +4,31 @@ from datetime import datetime
 Config = {
     'logging' : {
         'version': 1,
-        'disable_existing_loggers': False,
+        'disable_existing_loggers': True,
         'formatters': {
             'standard': {
-                'format': '%(asctime)s: %(levelname)s,[%(name)s],%(message)s',
+                'format': '%(asctime)s:%(module)s,%(lineno)s,%(levelname)s,[%(name)s],%(message)s',
             },
         },
         'handlers': {
             'default': {
                 'level': 'DEBUG',
-                'class': 'logging.FileHandler',
-                #'filename': 'sugarscape.log',
+                'class': 'logging.handlers.RotatingFileHandler',
                 'filename': 'sugarscape_%s.log' % datetime.now().strftime('%Y_%m_%d_%H_%M_%S_%f'),
+                'formatter': 'standard',
+                'mode': 'a',
+                'maxBytes': 104857600,
+                'backupCount': 5,
+            },
+            'console': {
+                'level': 'DEBUG',
+                'class': 'logging.StreamHandler',
+                'formatter': 'standard',
             },
         },
         'loggers': {
             '': {
-                'handlers': ['default'],
+                'handlers': ['default',],
                 'level': 'DEBUG',
                 'formatter': 'standard',
                 'propagate': True,

@@ -2,6 +2,7 @@
 import logging
 import logging.config
 import random
+import sys
 import gevent
 from gevent.queue import Queue
 from gevent.event import Event, AsyncResult
@@ -9,7 +10,6 @@ from Config import Config
 from Constants import *
 from DBDecorator import *
 
-logging.config.dictConfig(Config['logging'])
 
 class Player(gevent.Greenlet):
     logger = logging.getLogger('player')
@@ -21,24 +21,31 @@ class Player(gevent.Greenlet):
         self.consumeRate = Config['consumeRate']
         gevent.Greenlet.__init__(self)
 
+    @SaveObject
     def _run(self):
-        self.running = True
-        self.logger.debug('%s start' % self._key)
-        while self.running:
-            self.tick.wait()
-            self.tick.clear()
-            nextPosition = self.decideNextAction()
-            action = self.nextAction.get()
-            self.nextAction = AsyncResult()
+        try:
+            self.running = True
+            self.logger.debug('%s start' % self._key)
+            while self.running:
+                self.tick.wait()
+                self.tick.clear()
+                nextPosition = self.decideNextAction()
+                action = self.nextAction.get()
+                self.nextAction = AsyncResult()
 
-            if action == Action.MOVE:
-                self.move(nextPosition)
-            elif action == Action.GATHER:
-                self.gather()
-            
-            self.consume()
+                if action == Action.MOVE:
+                    self.move(nextPosition)
+                elif action == Action.GATHER:
+                    self.gather()
+                
+                self.consume()
 
-        self.dead()
+        except KeyboardInterrupt:
+            self.logger.debug('end signal')
+            raise SystemExit
+        except:
+            self.logger.error(sys.exc_info()[0])
+
 
     @LoadObject
     def load(self):
@@ -80,6 +87,7 @@ class Player(gevent.Greenlet):
     @SaveObject
     def consume(self):
         if self.sugar <= 0:
+            self.dead()
             self.running = False
             return
 
@@ -87,7 +95,7 @@ class Player(gevent.Greenlet):
 
     @DeleteObject
     def dead(self):
-        self.logger.debug('%s dead', self._key)
+        self.logger.debug('%s dead, sugar:%d, pos:%s', self._key, self.sugar, self.position)
         self.sugarscape.dead(self)
 
     def Key(self):

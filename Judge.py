@@ -16,30 +16,36 @@ class MoveJudge(gevent.Greenlet):
         gevent.Greenlet.__init__(self)
 
     def _run(self):
-        self.running = True
-        
-        while self.running:
-            moveRequester = []
-            while not self.inbox.empty():
-                moveRequester.append(self.inbox.get())
+        try:
+            self.running = True
             
-            if not moveRequester:
-                gevent.sleep(0)
-                continue
-
-            moveRequester.sort()
-            while moveRequester:
-                requests = [moveRequester.pop(0)]
-                while moveRequester and requests[0][0] == moveRequester[0][0]:
-                    requests.append(moveRequester.pop(0))
-                if self.terrain.existPlayer(requests[0][0]):
-                    for req in requests:
-                        req[1].nextAction.set(Action.GATHER)
+            while self.running:
+                moveRequester = []
+                while not self.inbox.empty():
+                    moveRequester.append(self.inbox.get())
+                
+                if not moveRequester:
+                    gevent.sleep(0)
                     continue
 
-                winRequest = requests.pop(random.randrange(len(requests)))
-                self.terrain.reserveMove(winRequest[1], winRequest[0])
-                winRequest[1].nextAction.set(Action.MOVE)
-                for req in requests:
-                    req[1].nextAction.set(Action.GATHER)
+                moveRequester.sort()
+                while moveRequester:
+                    requests = [moveRequester.pop(0)]
+                    while moveRequester and requests[0][0] == moveRequester[0][0]:
+                        requests.append(moveRequester.pop(0))
+                    if self.terrain.existPlayer(requests[0][0]):
+                        for req in requests:
+                            req[1].nextAction.set(Action.GATHER)
+                        continue
+
+                    winRequest = requests.pop(random.randrange(len(requests)))
+                    self.terrain.reserveMove(winRequest[1], winRequest[0])
+                    winRequest[1].nextAction.set(Action.MOVE)
+                    for req in requests:
+                        req[1].nextAction.set(Action.GATHER)
+        except KeyboardInterrupt:
+            self.logger.debug('end signal')
+            raise SystemExit
+        except:
+            self.logger.error(sys.exc_info()[0])
 

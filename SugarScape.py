@@ -42,8 +42,17 @@ class SugarScape:
         for player in self.players:
             player.start()
 
+    @SaveObject
     def join(self):
-        gevent.joinall([self.terrain] + [self.judge])
+        try:
+            gevent.joinall([self.terrain] + [self.judge] + self.players)
+        except SystemExit:
+            for player in self.players:
+                player.running = False
+            gevent.joinall(self.players)
+            self.judge.running = False
+            self.terrain.running = False
+            gevent.joinall([self.terrain])
 
     @SaveObject
     def born(self, player):

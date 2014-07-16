@@ -1,4 +1,5 @@
 # encoding : utf-8
+import Config
 from SugarScape import SugarScape
 
 if __name__ == '__main__':
