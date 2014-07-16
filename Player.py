@@ -44,7 +44,7 @@ class Player(gevent.Greenlet):
             self.logger.debug('end signal')
             raise SystemExit
         except:
-            self.logger.error(sys.exc_info()[0])
+            self.logger.error('%s,%s,%s' % sys.exc_info())
 
 
     @LoadObject
