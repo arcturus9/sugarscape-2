@@ -39,6 +39,7 @@ class Player(gevent.Greenlet):
                     self.gather()
                 
                 self.consume()
+                self.check()
 
         except KeyboardInterrupt:
             self.logger.debug('end signal')
@@ -54,6 +55,11 @@ class Player(gevent.Greenlet):
     def born(self, sugar):
         self.sugar = 10
         self.sugarscape.born(self)
+
+    @DeleteObject
+    def dead(self):
+        self.logger.debug('%s dead, sugar:%d, pos:%s', self._key, self.sugar, self.position)
+        self.sugarscape.dead(self)
 
     def decideNextAction(self):
         sugarOnHere = self.sugarscape.peek(self.position)
@@ -86,17 +92,12 @@ class Player(gevent.Greenlet):
 
     @SaveObject
     def consume(self):
+        self.sugar -= self.consumeRate
+
+    def check(self):
         if self.sugar <= 0:
             self.dead()
             self.running = False
-            return
-
-        self.sugar -= self.consumeRate
-
-    @DeleteObject
-    def dead(self):
-        self.logger.debug('%s dead, sugar:%d, pos:%s', self._key, self.sugar, self.position)
-        self.sugarscape.dead(self)
 
     def Key(self):
         return self._key
