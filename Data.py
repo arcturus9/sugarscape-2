@@ -2,9 +2,9 @@
 import random
 
 MAX_GROWTH = 2
-MAP_SIZE = 150
+MAP_SIZE = 50
 
-ProbablityTable = [0 for i in xrange(65)] + [1 for i in xrange(22)] + [2 for i in xrange(13)]
+ProbablityTable = [0 for i in xrange(65)] + [1 for i in xrange(25)] + [2 for i in xrange(10)]
 GrowthMap = [[random.choice(ProbablityTable) for i in xrange(MAP_SIZE)] for j in xrange(MAP_SIZE)]
 
 if __name__ == '__main__':

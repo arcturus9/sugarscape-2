@@ -1,4 +1,5 @@
 # encoding : utf-8
+import sys
 import copy
 import random
 import logging
@@ -119,4 +120,3 @@ class Terrain(gevent.Greenlet):
             'playerSave': playerSave,
             'reservePositionSave': reservePositionSave,
         }
-

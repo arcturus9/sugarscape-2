@@ -10,7 +10,7 @@ from Data import GrowthMap, MAP_SIZE
 from Terrain import Terrain
 from Player import Player
 
-PLAYER_COUNT = 4000
+PLAYER_COUNT = 800
 
 players = [Player('player_%d' % i, None) for i in xrange(PLAYER_COUNT)]
 terrain = Terrain()
